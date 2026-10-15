@@ -190,7 +190,7 @@ func (c *Client) Ping() error {
 	}
 	err := c.client.Ping(context.Background(), nil)
 	if err != nil {
-		return fmt.Errorf("MongoDB Ping失败: %v", err)
+        return fmt.Errorf("MongoDB ping failed: %v", err)
 	}
 	return nil
 }
@@ -224,7 +224,7 @@ func (c *Client) FindFilesByPattern(pattern string) (map[string][]byte, error) {
 		// 获取文件的 _id 字段
 		id, ok := fileInfo["_id"].(primitive.ObjectID)
 		if !ok {
-			return nil, fmt.Errorf("文件信息中没有 _id 字段")
+        return nil, fmt.Errorf("file metadata does not contain an _id field")
 		}
 
 		// 通过 _id 查找文件内容

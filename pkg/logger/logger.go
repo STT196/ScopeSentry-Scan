@@ -58,7 +58,7 @@ func NewLogger() error {
 	var err error
 	ZapLog, err = c.Build()
 	if err != nil {
-		return fmt.Errorf("log 初始化失败: %v", err)
+        return fmt.Errorf("failed to initialize logger: %v", err)
 	}
 
 	go processLogBuffer()

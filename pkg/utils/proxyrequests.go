@@ -71,7 +71,7 @@ func GetProxyClient(proxyAddr string) (*fasthttp.Client, error) {
 	// 创建新客户端
 	client, err := CreateClientWithProxy(proxyAddr)
 	if err != nil {
-		return nil, fmt.Errorf("创建带代理的客户端失败: %v", err)
+        return nil, fmt.Errorf("failed to create proxy client: %v", err)
 	}
 
 	// 存储该代理和对应的客户端

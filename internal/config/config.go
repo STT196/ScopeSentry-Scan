@@ -143,7 +143,7 @@ func Initialize() {
 	// 初始化子域名接管规则
 	err = json.Unmarshal(global.TakeoverFinger, &global.SubdomainTakerFingers)
 	if err != nil {
-		log.Fatalf("子域名接管规则初始化失败: %v", err)
+        log.Fatalf("failed to initialize subdomain takeover rules: %v", err)
 	}
 	InitFilterUrlRe()
 	global.CustomMapParameter = sync.Map{}

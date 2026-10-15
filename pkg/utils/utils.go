@@ -342,7 +342,7 @@ func (t *UtilTools) DeleteFile(filePath string) {
 func (t *UtilTools) DeleteFolder(folderPath string) error {
 	err := os.RemoveAll(folderPath)
 	if err != nil {
-		return fmt.Errorf("删除文件夹失败: %v", err)
+        return fmt.Errorf("failed to delete folder: %v", err)
 	}
 	return nil
 }
@@ -409,12 +409,12 @@ func (t *UtilTools) GetParameter(Parameters map[string]map[string]string, module
 func (t *UtilTools) GetRootDomain(input string) (string, error) {
 	u, err := t.SafeParseURL(input)
 	if err != nil {
-		return input, fmt.Errorf("URL 解析失败: %w", err)
+        return input, fmt.Errorf("URL parsing failed: %w", err)
 	}
 
 	hostname := u.Hostname()
 	if hostname == "" {
-		return input, fmt.Errorf("无法获取 Hostname")
+        return input, fmt.Errorf("could not get hostname")
 	}
 
 	// 是 IP 则直接返回
@@ -425,7 +425,7 @@ func (t *UtilTools) GetRootDomain(input string) (string, error) {
 	// 提取有效根域名
 	rootDomain, err := publicsuffix.EffectiveTLDPlusOne(hostname)
 	if err != nil {
-		return input, fmt.Errorf("根域名解析错误: %w", err)
+        return input, fmt.Errorf("root domain parsing failed: %w", err)
 	}
 
 	return rootDomain, nil
@@ -434,7 +434,7 @@ func (t *UtilTools) GetRootDomain(input string) (string, error) {
 // SafeParseURL 安全解析 URL，处理非法 %、中文域名、空格等问题
 func (t *UtilTools) SafeParseURL(input string) (*url.URL, error) {
 	if input == "" {
-		return nil, fmt.Errorf("输入为空")
+        return nil, fmt.Errorf("input is empty")
 	}
 
 	input = strings.TrimSpace(input)
@@ -448,13 +448,13 @@ func (t *UtilTools) SafeParseURL(input string) (*url.URL, error) {
 
 	u, err := url.Parse(input)
 	if err != nil {
-		return nil, fmt.Errorf("URL 解析失败: %w", err)
+        return nil, fmt.Errorf("URL parsing failed: %w", err)
 	}
 
 	// IDNA 处理中文域名
 	asciiHost, err := idna.ToASCII(u.Hostname())
 	if err != nil {
-		return nil, fmt.Errorf("域名 IDNA 转换失败: %w", err)
+        return nil, fmt.Errorf("IDNA domain conversion failed: %w", err)
 	}
 
 	// 补上端口（如有）
@@ -800,7 +800,7 @@ func (t *UtilTools) WriteLinesToFile(filePath string, lines *[]string) error {
 	// 打开文件，如果文件不存在则创建
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("无法打开文件: %v", err)
+        return fmt.Errorf("could not open file: %v", err)
 	}
 	defer func(file *os.File) {
 		err := file.Close()
@@ -816,13 +816,13 @@ func (t *UtilTools) WriteLinesToFile(filePath string, lines *[]string) error {
 	for _, line := range *lines {
 		_, err := writer.WriteString(line + "\n")
 		if err != nil {
-			return fmt.Errorf("写入文件时出错: %v", err)
+        return fmt.Errorf("error writing file: %v", err)
 		}
 	}
 
 	// 刷新缓冲区，确保所有数据写入文件
 	if err := writer.Flush(); err != nil {
-		return fmt.Errorf("刷新缓冲区时出错: %v", err)
+        return fmt.Errorf("error flushing buffer: %v", err)
 	}
 
 	return nil
@@ -884,7 +884,7 @@ func (t *UtilTools) EnsureDir(dirPath string) error {
 		// 如果目录不存在，则创建目录
 		err := os.MkdirAll(dirPath, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("创建目录失败: %w", err)
+        return fmt.Errorf("failed to create directory: %w", err)
 		}
 		return nil
 	} else {
@@ -1288,7 +1288,7 @@ func (t *UtilTools) GenerateIgnore(ignore string) ([]string, []*regexp.Regexp, e
 func (t *UtilTools) IsSuffixURL(rawURL string, suffix string) bool {
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		fmt.Println("URL 解析错误:", err)
+        fmt.Println("URL parsing error:", err)
 		return false
 	}
 
@@ -1445,7 +1445,7 @@ func (t *UtilTools) HandleLinuxTemp() {
 	cmd := exec.Command("bash", "-c", findCmd)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("执行 Linux find 命令时出错: %v\n", err)
+        fmt.Printf("error running Linux find command: %v\n", err)
 		logger.SlogWarn("清空临时文件出错，请手动清空/tmp目录，防止磁盘占用过大")
 		return
 	}

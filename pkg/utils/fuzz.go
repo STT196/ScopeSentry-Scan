@@ -98,7 +98,7 @@ func FuzzPostJson(uri string, id string, header map[string]string, wg *sync.Wait
 	jsonData, err := json.Marshal(params)
 	if err != nil {
 		// 处理 JSON 序列化错误
-		fmt.Println("JSON 序列化失败:", err)
+        fmt.Println("JSON serialization failed:", err)
 		return
 	}
 	wg.Add(1)

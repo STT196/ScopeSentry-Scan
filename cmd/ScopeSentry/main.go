@@ -159,7 +159,7 @@ func pprof() {
 
 		go func() {
 			sig := <-sigs
-			fmt.Println("收到终止信号:", sig)
+            fmt.Println("received termination signal:", sig)
 		}()
 	}
 }

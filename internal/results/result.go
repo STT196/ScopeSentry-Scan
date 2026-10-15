@@ -121,7 +121,7 @@ func (r *result) InsertVulnerabilityScan(result *[]interface{}) {
 		}
 
 		if vulnResult == nil {
-			fmt.Println("类型断言失败:", reflect.TypeOf(v))
+            fmt.Println("type assertion failed:", reflect.TypeOf(v))
 			continue
 		}
 

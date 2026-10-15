@@ -230,7 +230,7 @@ func (r *Client) Ping(ctx context.Context) error {
 	}
 	_, err := r.client.Ping(ctx).Result()
 	if err != nil {
-		return fmt.Errorf("Redis Ping失败: %v", err)
+        return fmt.Errorf("Redis ping failed: %v", err)
 	}
 	return nil
 }

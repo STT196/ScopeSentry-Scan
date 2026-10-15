@@ -1,6 +1,7 @@
 # ScopeSentry-Scan
-ScopeSentry工具的扫描端
+The scanning component of ScopeSentry.
 
-# 教程&安装
-- 官网: https://www.scope-sentry.top/
-- Github: https://github.com/Autumn-27/ScopeSentry
+## Documentation and Installation
+
+- Website: https://www.scope-sentry.top/
+- Main project: https://github.com/Autumn-27/ScopeSentry

@@ -35,6 +35,7 @@ func LoadConfig() error {
 			NodeName:     getEnv("NodeName", ""),
 			TimeZoneName: getEnv("TimeZoneName", "Asia/Shanghai"),
 			MongoDB: global.MongoDBConfig{
+				URI:      getEnv("MONGODB_URI", ""),
 				IP:       getEnv("MONGODB_IP", ""),
 				Port:     getEnv("MONGODB_PORT", "27017"),
 				User:     getEnv("MONGODB_USER", ""),
@@ -42,6 +43,7 @@ func LoadConfig() error {
 				Database: getEnv("MONGODB_DATABASE", ""),
 			},
 			Redis: global.RedisConfig{
+				URI:      getEnv("REDIS_URL", ""),
 				IP:       getEnv("REDIS_IP", ""),
 				Port:     getEnv("REDIS_PORT", "6379"),
 				Password: getEnv("REDIS_PASSWORD", ""),
@@ -67,8 +69,8 @@ func LoadConfig() error {
 		if err := createConfigFile(global.ConfigPath, global.AppConfig); err != nil {
 			return err
 		}
-		if global.AppConfig.MongoDB.IP == "" {
-			return fmt.Errorf("missing required MongoDB IP configuration")
+		if global.AppConfig.MongoDB.URI == "" && global.AppConfig.MongoDB.IP == "" {
+			return fmt.Errorf("missing required MongoDB IP or URI configuration")
 		}
 
 	}

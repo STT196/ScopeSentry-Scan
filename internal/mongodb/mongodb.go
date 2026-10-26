@@ -12,13 +12,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
+
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/global"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/url"
 )
 
 type Client struct {
@@ -56,8 +58,15 @@ var MongodbClient *Client
 //}
 
 func Initialize() {
-	encodedPassword := url.QueryEscape(global.AppConfig.MongoDB.Password)
-	connectionURI := fmt.Sprintf("mongodb://%s:%s@%s:%s/?maxPoolSize=50", global.AppConfig.MongoDB.User, encodedPassword, global.AppConfig.MongoDB.IP, global.AppConfig.MongoDB.Port)
+	connectionURI := strings.TrimSpace(global.AppConfig.MongoDB.URI)
+	if connectionURI == "" {
+		encodedPassword := url.QueryEscape(global.AppConfig.MongoDB.Password)
+		if global.AppConfig.MongoDB.User != "" && global.AppConfig.MongoDB.Password != "" {
+			connectionURI = fmt.Sprintf("mongodb://%s:%s@%s:%s/?maxPoolSize=50", global.AppConfig.MongoDB.User, encodedPassword, global.AppConfig.MongoDB.IP, global.AppConfig.MongoDB.Port)
+		} else {
+			connectionURI = fmt.Sprintf("mongodb://%s:%s/?maxPoolSize=50", global.AppConfig.MongoDB.IP, global.AppConfig.MongoDB.Port)
+		}
+	}
 	clientOptions := options.Client().ApplyURI(connectionURI)
 	var MaxPoolSizevalue uint64 = 50
 	clientOptions.MaxPoolSize = &MaxPoolSizevalue

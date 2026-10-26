@@ -11,9 +11,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/global"
 	"github.com/redis/go-redis/v9"
-	"time"
 )
 
 // Client 结构体用于封装 Redis 客户端
@@ -46,15 +48,26 @@ var RedisClient *Client
 //}
 
 func Initialize() {
-	client := redis.NewClient(&redis.Options{
-		Addr:           global.AppConfig.Redis.IP + ":" + global.AppConfig.Redis.Port,
-		Password:       global.AppConfig.Redis.Password,
-		DB:             0,
-		ReadTimeout:    -2,
-		MaxActiveConns: 50,
-		MinIdleConns:   5,
-		MaxIdleConns:   10,
-	})
+	var client *redis.Client
+	uri := strings.TrimSpace(global.AppConfig.Redis.URI)
+	if uri != "" {
+		options, err := redis.ParseURL(uri)
+		if err != nil {
+			fmt.Printf("failed to parse REDIS_URL: %v", err)
+			return
+		}
+		client = redis.NewClient(options)
+	} else {
+		client = redis.NewClient(&redis.Options{
+			Addr:           global.AppConfig.Redis.IP + ":" + global.AppConfig.Redis.Port,
+			Password:       global.AppConfig.Redis.Password,
+			DB:             0,
+			ReadTimeout:    -2,
+			MaxActiveConns: 50,
+			MinIdleConns:   5,
+			MaxIdleConns:   10,
+		})
+	}
 
 	// 检查连接是否正常
 	_, err := client.Ping(context.Background()).Result()

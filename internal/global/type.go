@@ -18,6 +18,7 @@ type Config struct {
 }
 
 type MongoDBConfig struct {
+	URI      string `yaml:"uri"`
 	IP       string `yaml:"ip"`
 	Port     string `yaml:"port"`
 	User     string `yaml:"user"`
@@ -26,6 +27,7 @@ type MongoDBConfig struct {
 }
 
 type RedisConfig struct {
+	URI      string `yaml:"uri"`
 	IP       string `yaml:"ip"`
 	Port     string `yaml:"port"`
 	Password string `yaml:"password"`

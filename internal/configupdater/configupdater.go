@@ -22,6 +22,7 @@ import (
 	goRedis "github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -33,6 +34,13 @@ func UpdateGlobalModulesConfig() {
 	var result ConfigResult
 	err := mongodb.MongodbClient.FindOne("config", bson.M{"name": "ModulesConfig"}, bson.M{"_id": 0, "value": 1}, &result)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.SlogWarnLocal("system config not found in MongoDB, using default empty config")
+			if writeErr := utils.Tools.WriteContentFile(config.ModulesConfigPath, ""); writeErr != nil {
+				logger.SlogErrorLocal(fmt.Sprintf("system config writing empty file error: %v", writeErr))
+			}
+			return
+		}
 		logger.SlogErrorLocal(fmt.Sprintf("system config load error: %v", err))
 		return
 	}
@@ -105,6 +113,13 @@ func UpdateSubfinderApiConfig() {
 	}
 	err := mongodb.MongodbClient.FindOne("config", bson.M{"name": "SubfinderApiConfig"}, bson.M{"_id": 0, "value": 1}, &result)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.SlogWarnLocal("SubfinderApiConfig not found in MongoDB, using empty default config")
+			if writeErr := utils.Tools.WriteContentFile(filepath.Join(global.ConfigDir, "subfinderConfig.yaml"), ""); writeErr != nil {
+				logger.SlogErrorLocal(fmt.Sprintf("Subfinder writing empty file error: %v", writeErr))
+			}
+			return
+		}
 		logger.SlogErrorLocal(fmt.Sprintf("UpdateSubfinderApiConfig load error: %v", err))
 		return
 	}
@@ -125,6 +140,13 @@ func UpdateRadConfig() {
 	radConfigPath := filepath.Join(global.ExtDir, "rad", "rad_config.yml")
 	err := mongodb.MongodbClient.FindOne("config", bson.M{"name": "RadConfig"}, bson.M{"_id": 0, "value": 1}, &result)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.SlogWarnLocal("RadConfig not found in MongoDB, using empty default config")
+			if writeErr := utils.Tools.WriteContentFile(radConfigPath, ""); writeErr != nil {
+				logger.SlogErrorLocal(fmt.Sprintf("Rad writing empty file error: %v", writeErr))
+			}
+			return
+		}
 		logger.SlogErrorLocal(fmt.Sprintf("UpdateRadConfig load error: %v", err))
 		return
 	}

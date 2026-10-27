@@ -13,8 +13,13 @@ type Config struct {
 	State        int           `yaml:"state"`
 	TimeZoneName string        `yaml:"TimeZoneName"`
 	Debug        bool          `yaml:"debug"`
-	MongoDB      MongoDBConfig `yaml:"mongodb"`
-	Redis        RedisConfig   `yaml:"redis"`
+	// Proxy is the egress proxy for HTTP-layer scanning tools (http/https/socks5).
+	// Empty = direct. Applied process-wide as HTTP_PROXY/HTTPS_PROXY/ALL_PROXY so
+	// httpx / nuclei / crawler / dirscan and other HTTP tools honor it. Raw-socket
+	// scans (port/DNS) ignore it and still use the node's own IP.
+	Proxy   string        `yaml:"proxy"`
+	MongoDB MongoDBConfig `yaml:"mongodb"`
+	Redis   RedisConfig   `yaml:"redis"`
 }
 
 type MongoDBConfig struct {

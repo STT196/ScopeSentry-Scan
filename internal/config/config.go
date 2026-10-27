@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 )
 
@@ -34,6 +35,7 @@ func LoadConfig() error {
 		global.AppConfig = global.Config{
 			NodeName:     getEnv("NodeName", ""),
 			TimeZoneName: getEnv("TimeZoneName", "Asia/Shanghai"),
+			Proxy:        getEnv("PROXY", ""),
 			MongoDB: global.MongoDBConfig{
 				URI:      getEnv("MONGODB_URI", ""),
 				IP:       getEnv("MONGODB_IP", ""),
@@ -124,6 +126,45 @@ func InitFilterUrlRe() {
 	global.DisallowedURLFilters = append(global.DisallowedURLFilters, regexp.MustCompile(disallowedRegex))
 }
 
+// proxyEnv returns the process env vars to set when an egress proxy is
+// configured. Empty proxy returns nil (direct connection). localhost is excluded
+// from proxying so the node's own DB/Redis connections are never routed out.
+func proxyEnv(proxy string) map[string]string {
+	proxy = strings.TrimSpace(proxy)
+	if proxy == "" {
+		return nil
+	}
+	return map[string]string{
+		"HTTP_PROXY":  proxy,
+		"HTTPS_PROXY": proxy,
+		"ALL_PROXY":   proxy,
+		"http_proxy":  proxy,
+		"https_proxy": proxy,
+		"all_proxy":   proxy,
+		"NO_PROXY":    "localhost,127.0.0.1",
+		"no_proxy":    "localhost,127.0.0.1",
+	}
+}
+
+// applyProxyConfig sets proxy env vars from the loaded config so HTTP-layer
+// scanning tools route through the configured egress.
+func applyProxyConfig() {
+	for key, value := range proxyEnv(global.AppConfig.Proxy) {
+		_ = os.Setenv(key, value)
+	}
+}
+
+// ApplyTaskProxy applies a per-task egress proxy supplied by the orchestrator.
+// Empty proxy leaves the node default untouched. External tools spawned by the
+// node inherit these vars per task; in-process HTTP clients may cache the proxy
+// on first use, so strict per-task isolation across concurrent tasks on one node
+// is not guaranteed — prefer one node per egress in that case.
+func ApplyTaskProxy(proxy string) {
+	for key, value := range proxyEnv(proxy) {
+		_ = os.Setenv(key, value)
+	}
+}
+
 func Initialize() {
 	global.VERSION = "1.9.1"
 	fmt.Printf("version %v\n", global.VERSION)
@@ -141,6 +182,7 @@ func Initialize() {
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
+	applyProxyConfig()
 
 	// 初始化子域名接管规则
 	err = json.Unmarshal(global.TakeoverFinger, &global.SubdomainTakerFingers)

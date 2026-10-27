@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/bigcache"
+	"github.com/Autumn-27/ScopeSentry-Scan/internal/config"
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/contextmanager"
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/global"
 	"github.com/Autumn-27/ScopeSentry-Scan/internal/handler"
@@ -26,6 +27,7 @@ import (
 	"github.com/Autumn-27/ScopeSentry-Scan/pkg/utils"
 	goRedis "github.com/redis/go-redis/v9"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -53,6 +55,9 @@ func RunPebbledbTask(value []byte) {
 			logger.SlogErrorLocal(fmt.Sprintf("PebbleStore delete error: %v", runnerOption.ID))
 		}
 		return
+	}
+	if strings.TrimSpace(runnerOption.Proxy) != "" {
+		config.ApplyTaskProxy(runnerOption.Proxy)
 	}
 	// 运行任务目标
 	RunPebbleTarget(runnerOption)
@@ -101,6 +106,11 @@ func RunRedisTask() {
 				continue
 			}
 			// 运行一些任务初始化的方法
+			// Apply the orchestrator-supplied per-task egress proxy (if any).
+			if strings.TrimSpace(runnerOption.Proxy) != "" {
+				config.ApplyTaskProxy(runnerOption.Proxy)
+				logger.SlogInfo(fmt.Sprintf("task %v using per-task proxy", runnerOption.ID))
+			}
 			InitTaskOption(runnerOption)
 			global.TaskName = runnerOption.TaskName
 

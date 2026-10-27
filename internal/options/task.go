@@ -37,4 +37,7 @@ type TaskOptions struct {
 	SubdomainFilename   string                       // 子域名扫描字典
 	ProtRangeId         string                       // 端口范围在数据库中的id
 	PortRange           string                       // 端口范围
+	// Proxy is the per-task egress proxy (http/https/socks5) supplied by the
+	// orchestrator (e.g. ARTEX Nightshift) so HTTP-layer scans route through it.
+	Proxy string `bson:"proxy" json:"proxy"`
 }
